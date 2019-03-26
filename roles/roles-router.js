@@ -49,7 +49,7 @@ router.post("/", (req, res) => {
         .where({ id })
         .first() // because we want the first item in the array.
         .then(role => {
-          res.status(200).json(role);
+          res.status(201).json(role);
         })
         .catch(error => {
           res.status(500).json(error);
@@ -59,13 +59,39 @@ router.post("/", (req, res) => {
 
 
 router.put("/:id", (req, res) => {
-  // update roles
-  res.send("Write code to modify a role");
+  const id = req.params.id;
+  const changes = req.body;
+
+  db("roles").where({ id })
+  .update(changes)
+  .then(count => {
+    if (count > 0 ) {
+      res.status(200).json(count);
+    } else {
+      res.status(404).json({ message: "Record not found." })
+    }
+  })
+  .catch(error => {
+    res.status(500).json(error);
+  });
 });
 
 router.delete("/:id", (req, res) => {
-  // remove roles (inactivate the role)
-  res.send("Write code to remove a role");
+  const { id } = req.params;
+
+  db("roles")
+    .where({ id })
+    .del()
+    .then(count => {
+      if (count > 0 ) {
+        res.status(204).end();
+      } else {
+        res.status(404).json({ message: "Record not found." })
+      }
+    })
+    .catch(error => {
+      res.status(500).json(error);
+    });
 });
 
 module.exports = router;
