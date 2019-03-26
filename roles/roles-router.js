@@ -5,7 +5,8 @@ const knexConfig = {
   useNullAsDefault: true,
   connection: {
     filename: "./data/roles.db3"
-  }
+  },
+  debug: true
 };
 
 const db = knex(knexConfig);
@@ -39,7 +40,23 @@ router.get("/:id", (req, res) => {
 router.post("/", (req, res) => {
   const role = req.body;
 
+  // get back an array with the last id generated.
+  db("roles")
+    .insert(role)
+    .then(ids => {
+      const id = ids[0];
+      db("roles")
+        .where({ id })
+        .first() // because we want the first item in the array.
+        .then(role => {
+          res.status(200).json(role);
+        })
+        .catch(error => {
+          res.status(500).json(error);
+        });
+    });
 });
+
 
 router.put("/:id", (req, res) => {
   // update roles
